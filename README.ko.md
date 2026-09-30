@@ -155,12 +155,17 @@ React UI, 사용자 동작을 공유하며 연결 bootstrap만 달라집니다.
 - [설치 없이 바로 실행되는 브라우저 데모 열기](https://smocket-site.vercel.app/demo)
 - `pnpm example:drawing-game`으로 소스 실행하기
 - [애플리케이션 case study](https://smocket-site.vercel.app/case-study)에서 Node.js
-  Socket.IO와 메모리에서 실행되는 Smocket의 역할 읽기
+  Socket.IO와 메모리에서 실행되는 smocket의 역할 읽기
 
 ## 지원 범위를 계속 확인하는 방법
 
 README에 금방 바뀌는 테스트 개수를 적는 대신, 각 공개 주장을 계속 관리되는 실행
 경로에 연결합니다.
+
+현재 소스의 타깃은 `socket.io@4.8.4`와 `socket.io-client@4.8.4`입니다. 각 릴리즈는
+적합성 보고서와 릴리즈 노트에 검증한 정확한 타깃을 기록하며, 다른 upstream 버전은
+별도 검증이 없다면 미검증 상태입니다. 자세한 내용은
+[타깃 정책](docs/decisions/0043-follow-one-declared-socketio-target.md)을 참고하세요.
 
 | 확인할 내용                                      | 유지되는 경로                                              |
 | ------------------------------------------------ | ---------------------------------------------------------- |

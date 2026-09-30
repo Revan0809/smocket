@@ -24,10 +24,6 @@ than discovered in a failing suite.
 - **No delay before reporting an absent server.** smocket fires `connect_error` on
   the next tick with no network wait, because a round-trip delay has no source in a
   mock. See [0005](./decisions/0005-missing-server-behavior.md).
-- **`Server.close()` always returns a promise.** Socket.IO 4.7 returns `void`, while
-  4.8 returns `Promise<void>`. The shared contract accepts either result; smocket
-  exposes the 4.8 promise so its in-memory teardown can be awaited. See
-  [0020](./decisions/0020-close-follows-socket-lifecycle.md).
 - **Handshake `headers`, `address`, `xdomain`, and `secure` are left unset.** These
   describe a real transport a mock does not have, so smocket leaves them rather
   than invent values. See [0006](./decisions/0006-handshake-fields.md).
@@ -46,7 +42,7 @@ than discovered in a failing suite.
 ## B. What smocket adds that socket.io has no equivalent for
 
 - **`server.connect(namespace, options)` and `server.nextConnection(namespace)`.** Neither is
-  a socket.io server API. Together they form Smocket's direct connection API. `connect`
+  a socket.io server API. Together they form smocket's direct connection API. `connect`
   opens the client without an origin-registry lookup, and `nextConnection` resolves with its
   admitted server-side Socket. Once the namespace exists, the per-namespace queues accept either
   call first and preserve FIFO order. Named static namespaces are established through `of()` or
@@ -76,7 +72,7 @@ than discovered in a failing suite.
 - **`TracingAdapter` records final broadcast routing decisions.** It stores one immutable,
   payload-free trace per successful concrete-namespace broadcast after exclusions and
   volatile filtering. Empty-recipient broadcasts are recorded, while direct Socket emits,
-  reserved events, and encoding failures are not. It can wrap another Smocket adapter so
+  reserved events, and encoding failures are not. It can wrap another smocket adapter so
   tracing does not replace custom routing, scheduling, or cleanup. See
   [0032](./decisions/0032-trace-final-broadcast-routing.md).
 - **`DroppingAdapter` removes selected sids from broadcast delivery.** The deterministic

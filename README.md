@@ -162,12 +162,17 @@ state, React UI, and user actions; only the connection bootstrap changes.
 - [Try the live browser demo — no setup required](https://smocket-site.vercel.app/demo)
 - Run the source with `pnpm example:drawing-game`
 - Read the [application case study](https://smocket-site.vercel.app/case-study) for
-  the Node.js Socket.IO and in-memory Smocket runtime roles
+  the Node.js Socket.IO and in-memory smocket runtime roles
 
 ## How the supported boundary stays checked
 
 The project links each public claim to a maintained workflow rather than copying
 test counts into this page.
+
+This source targets `socket.io@4.8.4` and `socket.io-client@4.8.4`. Each release
+records its exact validated target in the conformance report and release notes;
+other upstream versions are unverified unless explicitly validated. See the
+[target policy](docs/decisions/0043-follow-one-declared-socketio-target.md).
 
 | Question                                         | Maintained path                                                |
 | ------------------------------------------------ | -------------------------------------------------------------- |

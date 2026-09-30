@@ -86,7 +86,7 @@ export interface BroadcastContract<
 
 /**
  * The Socket.IO-compatible subset returned by {@link BroadcastContract.fetchSockets}.
- * Smocket returns its existing local server Socket object, while this type promises only
+ * smocket returns its existing local server Socket object, while this type promises only
  * the members Socket.IO exposes for values that could otherwise be remote.
  */
 export interface FetchedSocketContract<
@@ -124,8 +124,8 @@ export interface TimeoutEmitterContract<EmitEvents extends EventsMap = DefaultEv
  * once with `(null, responses)` when every recipient acks in time, or `(Error('operation
  * has timed out'), responses)` when the timer wins, where `responses` holds the acks that
  * arrived, in arrival order. A broadcast to no recipient resolves at once as `(null, [])`.
- * A late ack cannot settle the callback or Promise twice, but it may append to an already
- * exposed partial-response array. The narrowing methods chain and keep the timeout, so
+ * A late ack cannot settle the callback or Promise twice or change an already exposed
+ * partial-response array. The narrowing methods chain and keep the timeout, so
  * `io.timeout(ms).to(a).to(b)` targets the union and
  * `io.timeout(ms).to(a).except(b)` collects from the survivors only (#137). Reading
  * `volatile` before or after those narrowings keeps both the timeout and event map.
@@ -574,7 +574,7 @@ export interface ServerContract<
    * the on-based path code written for real socket.io actually uses.
    *
    * Socket.IO declares the return as the Server while its runtime delegates to the root
-   * Namespace and returns that object. Smocket preserves both observations: this contract
+   * Namespace and returns that object. smocket preserves both observations: this contract
    * carries the declared fluent type and the runtime returns `io.of('/')`.
    */
   on<
@@ -682,8 +682,8 @@ export interface ServerContract<
       socket: ServerSocketContract<ListenEvents, EmitEvents, ServerSideEvents, SocketData>,
     ) => void,
   ): NamespaceContract<ListenEvents, EmitEvents, ServerSideEvents, SocketData>;
-  /** Shut down every namespace and socket. Socket.IO 4.7 returns void; 4.8 returns a promise. */
-  close(fn?: (err?: Error) => void): void | Promise<void>;
+  /** Shut down every namespace and socket, returning the target's completion promise. */
+  close(fn?: (err?: Error) => void): Promise<void>;
 }
 
 /**
@@ -758,7 +758,7 @@ export interface ServerSocketContract<
   connected: boolean;
   /** Exact inverse of {@link connected}. */
   readonly disconnected: boolean;
-  /** Smocket does not reproduce connection-state recovery. */
+  /** smocket does not reproduce connection-state recovery. */
   readonly recovered: boolean;
   /** Server-only view of room membership; a live Set emptied in place on teardown. */
   rooms: Set<string>;
@@ -876,7 +876,7 @@ export interface ClientSocketContract<
   connected: boolean;
   /** Exact inverse of {@link connected}. */
   readonly disconnected: boolean;
-  /** Smocket does not reproduce connection-state recovery. */
+  /** smocket does not reproduce connection-state recovery. */
   recovered: boolean;
   /** Mutable auth source read again whenever application code reconnects this client. */
   auth: Record<string, unknown> | AuthCallback;

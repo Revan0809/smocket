@@ -22,6 +22,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as prettier from 'prettier';
+import { declaredTarget } from './check-public-surface.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const reportPath = join(root, 'docs', 'conformance.md');
@@ -110,7 +111,7 @@ const AREAS = [
     file: 'src/ack-native.test.ts',
     title: 'Native acknowledgement teardown race',
     blurb:
-      'Discarding or retaining acknowledgements as appropriate when a Smocket outgoing observer tears down a connection mid-send.',
+      'Discarding or retaining acknowledgements as appropriate when a smocket outgoing observer tears down a connection mid-send.',
   },
   {
     file: 'src/payload-serialization.test.ts',
@@ -237,7 +238,7 @@ const AREAS = [
     file: 'src/dropping-adapter.test.ts',
     title: 'Deterministic broadcast dropping',
     blurb:
-      'A Smocket-only final-recipient filter by sid, including acknowledgements, cleanup, namespace isolation, and adapter composition.',
+      'A smocket-only final-recipient filter by sid, including acknowledgements, cleanup, namespace isolation, and adapter composition.',
   },
   {
     file: 'src/broadcast-management-adapter.test.ts',
@@ -253,7 +254,7 @@ const AREAS = [
   {
     file: 'src/broadcast-promise-ack-native.test.ts',
     title: 'Native broadcast Promise policy',
-    blurb: 'Applying Smocket-only pre-connect volatile selection before acknowledgement counting.',
+    blurb: 'Applying smocket-only pre-connect volatile selection before acknowledgement counting.',
   },
   {
     file: 'src/socket-id.test.ts',
@@ -287,7 +288,7 @@ const AREAS = [
     file: 'examples/shared-worker-lobby/src/application.test.ts',
     title: 'SharedWorker lobby application handlers',
     blurb:
-      'Running the documented lobby handlers against real Socket.IO and Smocket, including duplicate-label identity, readiness, start, and disconnect.',
+      'Running the documented lobby handlers against real Socket.IO and smocket, including duplicate-label identity, readiness, start, and disconnect.',
   },
   {
     file: 'src/emitter-returns.test.ts',
@@ -441,15 +442,24 @@ function generate(real, mock) {
     (hasOracle(area.file) ? verified : smocketOnly).push(section(area, cases));
   }
 
-  const oracle = JSON.parse(
-    readFileSync(join(root, 'node_modules', 'socket.io', 'package.json'), 'utf8'),
-  ).version;
+  const target = declaredTarget(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')));
+  const references = [target.server, target.client].map(({ name, version }) => {
+    const installed = JSON.parse(
+      readFileSync(join(root, 'node_modules', name, 'package.json'), 'utf8'),
+    );
+    if (installed.name !== name || installed.version !== version) {
+      throw new Error(
+        `${name} resolved to ${installed.version}; expected declared target ${version}`,
+      );
+    }
+    return `${name} ${version}`;
+  });
 
   return [
     '## Verified against real socket.io',
     '',
     wrap(
-      `Every case below ran against socket.io ${oracle} first and against smocket second, from ` +
+      `Every case below ran against ${references.join(' and ')} first and against smocket second, from ` +
         'the same test file, and passed on both. Each links to the test that pins it.',
     ),
     '',

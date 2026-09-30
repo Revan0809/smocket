@@ -1,10 +1,10 @@
 # 0021. Event maps cross the substitution seam
 
-**Status:** Accepted · 2026-08-10 · #171
+**Status:** Accepted · 2026-08-10 · #171 · Revised 2026-09-30 · #519
 **Governed by:** [0000](./0000-do-not-invent-what-has-no-source.md),
 [0019](./0019-what-counts-as-a-breaking-change.md)
 
-> **TL;DR** Smocket's server and contracts carry Socket.IO's four generic slots, with
+> **TL;DR** smocket's server and contracts carry Socket.IO's four generic slots, with
 > defaults that keep existing untyped calls valid. Server and client directions are
 > reversed at their shared socket pair. `ServerSideEvents` preserves the type position;
 > it does not add multi-server behavior.
@@ -23,12 +23,14 @@ acknowledgements and `socket.data`. The free `connect` and `io` functions stay n
 as Socket.IO's client lookup functions are; an application substitution keeps reading the
 real client's own generic `Socket` type.
 
-Server `emitWithAck` accepts only acknowledgement callbacks that carry a response value;
-the client keeps Socket.IO client's wider event-name rule. Reserved disconnect listeners
+Server `emitWithAck` accepts acknowledgement callbacks with or without a response value,
+matching the 4.8.4 target under [0043](./0043-follow-one-declared-socketio-target.md).
+The earlier response-value restriction followed 4.7.5 and 4.8.3 and is retired.
+The client keeps Socket.IO client's wider event-name rule. Reserved disconnect listeners
 preserve each side's Socket.IO reason and description types.
 
 Socket.IO exports `DefaultEventsMap` from its root but keeps the `EventsMap` constraint on
-a blocked internal path. Smocket declares the small constraint locally. Importing it from
+a blocked internal path. smocket declares the small constraint locally. Importing it from
 `@socket.io/component-emitter` would add a runtime package to express a compile-time rule.
 
 Socket.IO's listener declarations use an internal conditional fallback that cannot be
@@ -36,7 +38,7 @@ structurally compared with an equivalent public generic contract. Structural `En
 guards therefore cover the comparable members, while compile-only consumer cases prove
 listener inference and reject wrong names, payloads and acknowledgement shapes.
 
-`ServerSideEvents` is present so the generic order survives substitution. Smocket does not
+`ServerSideEvents` is present so the generic order survives substitution. smocket does not
 implement `serverSideEmit`; multi-server delivery remains outside the project's scope.
 
 ## Alternatives rejected

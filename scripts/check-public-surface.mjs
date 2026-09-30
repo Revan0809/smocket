@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,26 +20,37 @@ const dispositions = new Set([
   'non-user-facing',
 ]);
 
-const targets = [
-  {
-    line: '4.7.5',
-    server: { alias: 'socket.io-4.7', name: 'socket.io', version: '4.7.5' },
-    client: {
-      alias: 'socket.io-client-4.7',
-      name: 'socket.io-client',
-      version: '4.7.5',
-    },
-  },
-  {
-    line: '4.8.3',
-    server: { alias: 'socket.io-4.8', name: 'socket.io', version: '4.8.3' },
-    client: {
-      alias: 'socket.io-client-4.8',
-      name: 'socket.io-client',
-      version: '4.8.3',
-    },
-  },
-];
+/** The root pins are the declared reference; installed packages must match them. */
+export function declaredTarget(manifest) {
+  const packages = ['socket.io', 'socket.io-client'].map((name) => {
+    const version = manifest.devDependencies?.[name];
+    if (typeof version !== 'string' || !/^\d+\.\d+\.\d+$/.test(version)) {
+      throw new Error(`package.json must pin ${name} to an exact stable version`);
+    }
+    return { alias: name, name, version };
+  });
+  const [server, client] = packages;
+  return {
+    line:
+      server.version === client.version ? server.version : `${server.version}+${client.version}`,
+    server,
+    client,
+  };
+}
+
+/** Adoption fixtures must exercise the release's declared target. */
+export function verifyAdoptionPins(manifest, target, source) {
+  for (const specification of [target.server, target.client]) {
+    for (const section of ['dependencies', 'devDependencies']) {
+      const version = manifest[section]?.[specification.name];
+      if (version !== undefined && version !== specification.version) {
+        throw new Error(
+          `${source} pins ${specification.name} to ${version}; expected ${specification.version}`,
+        );
+      }
+    }
+  }
+}
 
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,
@@ -501,9 +512,9 @@ function extractExportMap({ manifest, packageName, packageVersion, supportLine }
   );
 }
 
-function supplementalEntries(supportLine) {
+function supplementalEntries(target) {
   const common = {
-    supportLine,
+    supportLine: target.line,
     readonly: true,
     optional: false,
   };
@@ -511,7 +522,7 @@ function supplementalEntries(supportLine) {
     withId({
       ...common,
       package: 'socket.io',
-      packageVersion: supportLine,
+      packageVersion: target.server.version,
       tier: 'officially-documented',
       surface: 'package root',
       receiver: 'CommonJS module',
@@ -526,7 +537,7 @@ function supplementalEntries(supportLine) {
       withId({
         ...common,
         package: 'socket.io-client',
-        packageVersion: supportLine,
+        packageVersion: target.client.version,
         tier: 'runtime-only',
         surface: 'client Socket',
         receiver: 'instance',
@@ -586,7 +597,15 @@ export function generateInventory() {
 
   const entries = [];
   const resolutions = [];
-  for (const target of targets) {
+  for (const target of [declaredTarget(rootManifest)]) {
+    for (const directory of ['examples', 'consumers']) {
+      for (const entry of readdirSync(join(root, directory), { withFileTypes: true })) {
+        const path = join(root, directory, entry.name, 'package.json');
+        if (entry.isDirectory() && existsSync(path)) {
+          verifyAdoptionPins(readJson(path), target, `${directory}/${entry.name}/package.json`);
+        }
+      }
+    }
     const server = verifyPackage(target.server);
     const client = verifyPackage(target.client);
     const adapter = adapterForServer(server.path);
@@ -713,7 +732,7 @@ export function generateInventory() {
         }),
       );
     }
-    entries.push(...supplementalEntries(target.line));
+    entries.push(...supplementalEntries(target));
   }
 
   const duplicateIds = entries
