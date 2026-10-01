@@ -37,15 +37,15 @@ pnpm test
 
 `pnpm test`는 [Vitest](https://vitest.dev/)를 watch 모드로 돌리는 명령이라, 작업하는 동안 켜 두면 편합니다. 따로 확인할 개발 서버가 없다 보니, 테스트 출력 자체가 곧 피드백 루프인 셈입니다.
 
-| 명령어              | 설명                             |
-| ------------------- | -------------------------------- |
-| `pnpm test`         | 테스트를 watch 모드로 실행       |
-| `pnpm vitest run`   | 두 테스트 프로젝트를 한 번 실행  |
-| `pnpm typecheck`    | 결과물을 만들지 않고 타입만 검사 |
-| `pnpm lint`         | 코드와 문서 스타일 검사          |
-| `pnpm format`       | 저장소 포맷 적용                 |
-| `pnpm format:check` | 파일을 바꾸지 않고 포맷 검사     |
-| `pnpm docs:check`   | 문서 사이트 빌드 및 검사         |
+| 명령어              | 설명                            |
+| ------------------- | ------------------------------- |
+| `pnpm test`         | 테스트를 watch 모드로 실행      |
+| `pnpm vitest run`   | 두 테스트 프로젝트를 한 번 실행 |
+| `pnpm typecheck`    | 패키지 빌드 및 타입 검사        |
+| `pnpm lint`         | TypeScript 소스 파일 린트       |
+| `pnpm format`       | 저장소 포맷 적용                |
+| `pnpm format:check` | 파일을 바꾸지 않고 포맷 검사    |
+| `pnpm docs:check`   | 문서 사이트 빌드 및 검사        |
 
 Vitest는 어디까지나 개발 의존성일 뿐입니다. `src/` 어디에서도 import되지 않고, smocket을 설치한다고 해서 딸려 들어오지도 않습니다. spy나 fake timer가 필요한 헬퍼를 추가하게 되면, `vitest`에서 가져다 쓰는 대신 직접 구현해야 이 경계가 유지됩니다.
 
